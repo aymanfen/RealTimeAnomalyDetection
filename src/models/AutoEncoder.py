@@ -1,0 +1,52 @@
+from src.models.BaseClass import BaseAnomalyModel
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense
+from tensorflow.keras.optimizers import Adam
+import numpy as np
+
+
+def AutoEncoder(inputdim,latentdim,lr ):
+    # Input layers
+    inputs = Input(shape=(inputdim,))
+
+    # Encoder
+    x = Dense(64, activation="relu")(inputs)
+    x = Dense(32, activation="relu")(x)
+    latent = Dense(latentdim, activation="relu")(x)
+
+    # Decoder
+    x = Dense(32, activation="relu")(latent)
+    x = Dense(64, activation="relu")(x)
+    output = Dense(inputdim, activation="linear")(x)
+
+    # Autoencoder model
+    autoencoder = Model(inputs=inputs, outputs=output)
+    autoencoder.compile(optimizer=Adam(learning_rate=lr), loss="mse")
+
+    return autoencoder
+
+class AutoEncoderModel(BaseAnomalyModel):
+    framework='keras'
+    def __init__(self,
+                 inputdim,latentdim=8,lr=0.001,
+                 epochs=50,batchsize=64):
+        
+        self.params=locals()
+        self.model=AutoEncoder(inputdim,latentdim,lr)
+        self.epochs=epochs
+        self.batch_size=batchsize
+        
+          
+    def fit(self,X):
+        history=self.model.fit(X,X,
+                       epochs=self.epochs,batch_size=self.batch_size,
+                       shuffle=True)
+        return history
+
+    def reconstructionerror(self,X):
+        recon=self.model.predict(X)
+        return np.mean((X-recon)**2,axis=1)
+
+
+    def score(self,X):
+        return self.reconstructionerror(X)
