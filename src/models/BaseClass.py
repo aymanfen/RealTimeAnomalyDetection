@@ -5,7 +5,7 @@ import numpy as np
 class BaseAnomalyModel(ABC):
 
     @abstractmethod
-    def fit(self, X):
+    def fit(self, X,**fit_kwargs):
         pass
 
     @abstractmethod

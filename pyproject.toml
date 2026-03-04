@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "RealtimeAnomalyDetection"
+version = "0.1.0"
+description = "Unsupervised Anomaly Detection Models"
+authors = [{name="AymanFen"}]
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "tensorflow",
+    "mlflow",
+    "optuna"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

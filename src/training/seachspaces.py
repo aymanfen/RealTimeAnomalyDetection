@@ -8,11 +8,9 @@ def ifsearchspace(trial):
 
 def aesearchspace(trial):
     return {
-        "input_dim":INPUT_DIM,
-        "latent_dim":trial.suggest_int("latent_dim",4,32),
+        "latentdim":trial.suggest_int("latent_dim",4,32),
         "lr":trial.suggest_float("lr",1e-4,1e-2,log=True),
-        "epochs":trial.suggest_int("epochs",20,100),
-        "batch_size":trial.suggest_categorical([64,128,256])
+        "batchsize":trial.suggest_categorical("batch_size",choices=[64,128,256])
     }
 
 def somsearchspace(trial):
