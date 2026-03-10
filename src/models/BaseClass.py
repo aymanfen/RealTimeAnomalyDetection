@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-
+from scipy.stats import skew
 
 class BaseAnomalyModel(ABC):
 
@@ -22,7 +22,10 @@ class BaseAnomalyModel(ABC):
         return {
             "score_mean": float(np.mean(scores)),
             "score_std": float(np.std(scores)),
+            "score_skew": float(skew(scores)),
             "score_p95": float(np.percentile(scores, 95)),
+            "score_p99": float(np.percentile(scores, 99)),
+            "tailsep": float(np.percentile(scores,99)-np.mean(scores))
         }
     
     def normalize(self,scores):

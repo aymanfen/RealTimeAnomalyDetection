@@ -30,7 +30,7 @@ class AutoEncoderModel(BaseAnomalyModel):
     framework='keras'
     def __init__(self,
                  inputdim=18,latentdim=8,lr=0.001,
-                 epochs=50,batchsize=64,validationsplit=0.1):
+                 epochs=10,batchsize=64,validationsplit=0.1):
         
         self.params=locals()
         self.model=AutoEncoder(inputdim,latentdim,lr,)
@@ -43,7 +43,7 @@ class AutoEncoderModel(BaseAnomalyModel):
         X=X.to_numpy()
 
         callbacks=fit_kwargs.get("callbacks",[])
-        earlystop=EarlyStopping(monitor='val_loss',patience=10,
+        earlystop=EarlyStopping(monitor='val_loss',patience=5,
                                 restore_best_weights=True,verbose=0)
         callbacks.append(earlystop)
 

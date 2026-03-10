@@ -14,16 +14,5 @@ def trainmodel(model,Xtrain,experimentname='AnomalyDetection',runname=None):
 
         mlflow.log_metrics(metrics)
 
-        if model.framework=='sklearn':
-            mlflow.sklearn.log_model(
-                model.model,
-                artifact_path="model"
-            )
-            
-        elif model.framework=='keras':
-            mlflow.keras.log_model(
-                model.model,
-                artifact_path="model"
-            )
 
         return metrics
