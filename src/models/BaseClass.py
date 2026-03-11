@@ -25,7 +25,7 @@ class BaseAnomalyModel(ABC):
             "score_skew": float(skew(scores)),
             "score_p95": float(np.percentile(scores, 95)),
             "score_p99": float(np.percentile(scores, 99)),
-            "tailsep": float(np.percentile(scores,99)-np.mean(scores))
+            "tailsep": float(np.percentile(scores,99)-np.percentile(scores,90))
         }
     
     def normalize(self,scores):

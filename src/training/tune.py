@@ -18,7 +18,7 @@ def tunemodel(modelclass,modelsearchspace,Xtrain,ntrials=20,experimentname="Anom
             mlflow.log_metrics(metrics)
 
             #optimization target
-            return metrics['score_skew']
+            return metrics['tailsep']
         
     study=optuna.create_study(direction='maximize')
     study.optimize(objective,n_trials=ntrials)
