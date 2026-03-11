@@ -8,7 +8,6 @@ def ifsearchspace(trial):
 
 def aesearchspace(trial):
     return {
-        "latentdim":trial.suggest_int("latent_dim",4,32),
         "lr":trial.suggest_float("lr",1e-4,1e-2,log=True),
         "batchsize":trial.suggest_categorical("batch_size",choices=[64,128,256])
     }

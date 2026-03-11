@@ -11,13 +11,13 @@ def AutoEncoder(inputdim,latentdim,lr ):
     inputs = Input(shape=(inputdim,))
 
     # Encoder
-    x = Dense(64, activation="relu")(inputs)
-    x = Dense(32, activation="relu")(x)
-    latent = Dense(latentdim, activation="relu")(x)
+    x = Dense(12, activation="relu")(inputs)
+    x = Dense(8, activation="relu")(x)
+    latent = Dense(4, activation="relu")(x)
 
     # Decoder
-    x = Dense(32, activation="relu")(latent)
-    x = Dense(64, activation="relu")(x)
+    x = Dense(8, activation="relu")(latent)
+    x = Dense(12, activation="relu")(x)
     output = Dense(inputdim, activation="linear")(x)
 
     # Autoencoder model

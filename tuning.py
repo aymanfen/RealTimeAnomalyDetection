@@ -40,5 +40,5 @@ ifstudy=tunemodel(IsolationForestModel,ifsearchspace,
 somstudy=tunemodel(SOMModel,somsearchspace,
                  traindf,ntrials=30,experimentname='SOMTuningSkewMax')
 
-aestudy=tunemodel(AutoEncoderModel,aesearchspace,
-                traindf,ntrials=30,experimentname='AETuningSkewMax')
+# aestudy=tunemodel(AutoEncoderModel,aesearchspace,
+#                 traindf,ntrials=30,experimentname='AETuningSkewMax')
