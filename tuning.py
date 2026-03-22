@@ -16,7 +16,7 @@ from src.features.CatEntropy import ComputeCatEntropy
 from src.features.CatFreq import ComputeCatFreq
 from src.preprocessing.TrainTestSplit import split
 
-df=ComputeTimeFeatures(df) 
+df=ComputeTimeFeatures(df)
 df=ComputeCatEntropy(df)
 df=ComputeCatFreq(df)
 
@@ -33,12 +33,8 @@ from src.models.AutoEncoder import AutoEncoderModel
 
 from src.training.seachspaces import ifsearchspace,somsearchspace,aesearchspace
 from src.training.tune import tunemodel
-
-ifstudy=tunemodel(IsolationForestModel,ifsearchspace,
-                 traindf,ntrials=30,experimentname='IFTuningSkewMax')
-
-somstudy=tunemodel(SOMModel,somsearchspace,
-                 traindf,ntrials=30,experimentname='SOMTuningSkewMax')
+ 
 
 # aestudy=tunemodel(AutoEncoderModel,aesearchspace,
-#                 traindf,ntrials=30,experimentname='AETuningSkewMax')
+#                 traindf,ntrials=20,experimentname='AETuningMeanMin',
+#                 target='score_mean',dir='minimize')

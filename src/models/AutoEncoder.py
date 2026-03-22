@@ -54,6 +54,7 @@ class AutoEncoderModel(BaseAnomalyModel):
         return history
 
     def reconstructionerror(self,X):
+        X=X.to_numpy()
         recon=self.model.predict(X)
         return np.mean((X-recon)**2,axis=1)
 

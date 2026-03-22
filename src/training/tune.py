@@ -3,7 +3,7 @@ import mlflow
 from src.training.train import trainmodel
 
 
-def tunemodel(modelclass,modelsearchspace,Xtrain,ntrials=20,experimentname="AnomalyTuning"):
+def tunemodel(modelclass,modelsearchspace,Xtrain,target,dir,ntrials=20,experimentname="AnomalyTuning"):
     mlflow.set_experiment(experiment_name=experimentname)
 
     def objective(trial):
@@ -18,8 +18,8 @@ def tunemodel(modelclass,modelsearchspace,Xtrain,ntrials=20,experimentname="Anom
             mlflow.log_metrics(metrics)
 
             #optimization target
-            return metrics['tailsep']
+            return metrics[target]
         
-    study=optuna.create_study(direction='maximize')
+    study=optuna.create_study(direction=dir)
     study.optimize(objective,n_trials=ntrials)
     return study
