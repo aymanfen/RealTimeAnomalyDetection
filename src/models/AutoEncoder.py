@@ -29,7 +29,7 @@ def AutoEncoder(inputdim,latentdim,lr ):
 class AutoEncoderModel(BaseAnomalyModel):
     framework='keras'
     def __init__(self,
-                 inputdim=18,latentdim=8,lr=0.001,
+                 inputdim=18,latentdim=4,lr=0.001,
                  epochs=10,batchsize=64,validationsplit=0.1):
         
         self.params=locals()

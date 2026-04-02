@@ -7,5 +7,6 @@ def ComputeTimeFeatures(df):
     df['MovingStd']=df.groupby("Account Number")['LogAmount'].transform(lambda x : x.rolling(window=7).std())
     df['TimeDiff']=df.groupby("Account Number")['Time'].diff().dt.total_seconds()/3600
     df['LogTimeDiff']=np.log(df['TimeDiff'])
+    df['FirstTransactionDiff']=( df['Time']-df['Account Creation Date'] ).dt.total_seconds()/3600
 
     return df
