@@ -20,7 +20,8 @@ class SOMModel(BaseAnomalyModel):
         )
 
     def fit(self,X):
-        X=X.to_numpy()
+        if not isinstance(X, np.ndarray):
+            X = X.to_numpy()
 
         self.model.random_weights_init(X)
         self.model.train_random(X,self.iterations)
@@ -33,6 +34,7 @@ class SOMModel(BaseAnomalyModel):
         return np.linalg.norm(sample-weights)
 
     def score(self,X):
-        X=X.to_numpy()
+        if not isinstance(X, np.ndarray):
+            X = X.to_numpy()
         distances=np.array([self.bmudistance(x) for x in X])
         return distances

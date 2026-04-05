@@ -13,7 +13,7 @@ def AutoEncoder(inputdim,latentdim,lr ):
     # Encoder
     x = Dense(12, activation="relu")(inputs)
     x = Dense(8, activation="relu")(x)
-    latent = Dense(4, activation="relu")(x)
+    latent = Dense(latentdim, activation="relu")(x)
 
     # Decoder
     x = Dense(8, activation="relu")(latent)
@@ -29,7 +29,7 @@ def AutoEncoder(inputdim,latentdim,lr ):
 class AutoEncoderModel(BaseAnomalyModel):
     framework='keras'
     def __init__(self,
-                 inputdim=18,latentdim=4,lr=0.001,
+                 inputdim=18,latentdim=6,lr=0.001,
                  epochs=10,batchsize=64,validationsplit=0.1):
         
         self.params=locals()
@@ -40,10 +40,11 @@ class AutoEncoderModel(BaseAnomalyModel):
         
           
     def fit(self,X,**fit_kwargs ):
-        X=X.to_numpy()
+        if not isinstance(X, np.ndarray):
+            X = X.to_numpy()
 
         callbacks=fit_kwargs.get("callbacks",[])
-        earlystop=EarlyStopping(monitor='val_loss',patience=5,
+        earlystop=EarlyStopping(monitor='val_loss',patience=10,
                                 restore_best_weights=True,verbose=0)
         callbacks.append(earlystop)
 
@@ -54,7 +55,8 @@ class AutoEncoderModel(BaseAnomalyModel):
         return history
 
     def reconstructionerror(self,X):
-        X=X.to_numpy()
+        if not isinstance(X, np.ndarray):
+            X = X.to_numpy()
         recon=self.model.predict(X)
         return np.mean((X-recon)**2,axis=1)
 
