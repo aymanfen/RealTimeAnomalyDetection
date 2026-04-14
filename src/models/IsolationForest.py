@@ -3,7 +3,6 @@ from sklearn.ensemble import IsolationForest
 import numpy as np
 
 class IsolationForestModel(BaseAnomalyModel):
-    framework='sklearn'
     def __init__(self,nestimators=200,maxsamples=0.8,contamination=0.05,random_state=42):
 
         self.params={

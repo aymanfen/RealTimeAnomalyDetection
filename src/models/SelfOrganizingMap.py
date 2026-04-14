@@ -5,11 +5,17 @@ import numpy as np
 
 
 class SOMModel(BaseAnomalyModel):
-    framework='unknown'
     def __init__(self,x=10,y=10,inputlen=18,
                  sigma=1.0,learning_rate=0.5,iterations=1000):
         
-        self.params=locals()
+        self.params={
+            "x":x,
+            "y":y,
+            "inputlen":inputlen,
+            "sigma":sigma,
+            "learning_rate":learning_rate,
+            "iterations":iterations
+        }
         self.x=x
         self.y=y
         self.iterations=iterations

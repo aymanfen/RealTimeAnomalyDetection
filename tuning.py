@@ -24,7 +24,7 @@ df=ComputeCatEntropy(df)
 df=ComputeCatFreq(df)
 
 df = df.replace([np.inf, -np.inf], np.nan).fillna(0)
-df=df[['rank','Age',
+df=df[['rank','Age', 
        'LogAmount', 'MovingAvg','MovingStd', 'LogTimeDiff','Hour',
        'TransactionTypeEntropy', 'ChannelEntropy','CardTypeEntropy', 'MerchandEntropy', 'CountryEntropy', 'CityEntropy',
        'TransactionTypeFreq','ChannelFreq','CardTypeFreq', 'MerchandFreq', 'CountryFreq','CityFreq']]
@@ -48,9 +48,9 @@ iso=IsolationForestModel(nestimators=300,maxsamples='auto',contamination=0.01)
 ae=AutoEncoderModel(inputdim=traindf.shape[1],latentdim=6,lr=0.001,batchsize=256,epochs=50)
 som=SOMModel(inputlen=traindf.shape[1],x=20,y=20,sigma=0.8,learning_rate=0.4)
 
-trainmodel(iso,traindfscaled)
-trainmodel(ae,traindfscaled)
-trainmodel(som,traindfscaled)
+iso.fit(traindfscaled)
+ae.fit(traindfscaled)
+som.fit(traindfscaled)
 
 results['scaledisoscores']=iso.score(testdfscaled)
 results['scaledaescores']=ae.score(testdfscaled)
@@ -62,6 +62,8 @@ results['scaledisoscores']=minmax_scale(results['scaledisoscores'])
 results['scaledsomscores']=minmax_scale(results['scaledsomscores'])
 results['scaledaescores']=minmax_scale(results['scaledaescores'])
 
-
+iso.save(model_name='IF')
+ae.save(model_name='AE')
+som.save(model_name='SOM')
 
 results.to_csv("./data/results.csv")
