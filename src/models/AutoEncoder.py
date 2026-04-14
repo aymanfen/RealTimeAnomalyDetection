@@ -5,7 +5,6 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 import numpy as np
 
-
 def AutoEncoder(inputdim,latentdim,lr ):
     # Input layers
     inputs = Input(shape=(inputdim,))

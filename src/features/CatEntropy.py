@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
 def normalentropy(series):
     p=series.value_counts(normalize=True)
     h=-(p*np.log(p)).sum()
