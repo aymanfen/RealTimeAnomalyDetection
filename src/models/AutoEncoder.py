@@ -42,6 +42,7 @@ class AutoEncoderModel(BaseAnomalyModel):
         self.epochs=epochs
         self.batch_size=batchsize
         self.validation_split=0.1
+        self.feature_names=None
         
           
     def fit(self,X,**fit_kwargs ):
@@ -66,6 +67,35 @@ class AutoEncoderModel(BaseAnomalyModel):
         recon=self.model.predict(X)
         return np.mean((X-recon)**2,axis=1)
 
-
     def score(self,X):
         return self.reconstructionerror(X)
+    
+    def explain(self, X, feature_names=None):
+
+        recon = self.model.predict(X, verbose=0)
+
+        errors = (X - recon) ** 2
+
+        scores = np.mean(errors, axis=1)
+
+        contributions = (
+            errors /
+            (np.sum(errors, axis=1, keepdims=True) + 1e-8)
+        )
+
+        if feature_names is None:
+            feature_names = [
+                f"feature_{i}"
+                for i in range(X.shape[1])
+            ]
+
+        explanations = []
+
+        for row in contributions:
+
+            explanations.append({
+                feature_names[i]: float(row[i])
+                for i in range(len(feature_names))
+            })
+
+        return scores, explanations

@@ -29,15 +29,15 @@ class BaseAnomalyModel(ABC):
             "tailsep": float(np.percentile(scores,99)-np.percentile(scores,90))
         }
     
-    def normalize(self,scores):
-        return (scores - scores.mean()) / scores.std()
+    @abstractmethod
+    def explain(self,X):
+        pass
 
-    def save(self,model_name=None):
-
+    def save(self, model_name=None):
         if model_name is None:
             model_name = self.__class__.__name__
 
         filename = f"{model_name}.pkl"
-
+        
         with open(filename, "wb") as f:
             pickle.dump(self, f)

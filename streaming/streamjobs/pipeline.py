@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
-from pyspark.sql.functions import col, from_json
+from pyspark.sql.functions import col, from_json,current_timestamp
 
 from Features import ComputeTimeFeatures, ComputeAllFreqs, ComputeAllEntropy
 from Scoring import ComputeScores
@@ -71,33 +71,30 @@ def IcebergGoldWrite(batch_df, batch_id):
     batch_df = ComputeScores(batch_df)
     batch_df.writeTo("lake.gold.scores").append()
 
+def LakehouseWrite(batch_df, batch_id):
+    bronze_df = batch_df.withColumn("bronzetimestamp",current_timestamp())
+    bronze_df.writeTo("lake.bronze.transactions").append()
+
+    silver_df = batch_df.transform(ComputeTimeFeatures)\
+        .transform(ComputeAllFreqs)\
+        .transform(ComputeAllEntropy)\
+        .withColumn("silvertimestamp", current_timestamp())
+    silver_df.writeTo("lake.silver.features").append()
+
+    gold_df = silver_df.transform(ComputeScores)\
+        .withColumn("goldtimestamp", current_timestamp())\
+        .drop("silvertimestamp")
+    gold_df.writeTo("lake.gold.scores").append()
+
+
 
 # ── 4. queries ─────────────────────────────────────────────────────────────────
-bronzequery = df.writeStream \
-      .foreachBatch(IcebergBronzeWrite) \
-      .option("checkpointLocation", "/home/ec2-user/checkpoints/bronze") \
-      .outputMode("append") \
-      .start()
-
-silverquery = df.writeStream \
-      .foreachBatch(IcebergSilverWrite) \
-      .option("checkpointLocation", "/home/ec2-user/checkpoints/silver") \
-      .outputMode("append") \
-      .start()
-
-goldquery = spark.readStream.format("iceberg") \
-    .load("lake.silver.features") \
-    .writeStream.foreachBatch(IcebergGoldWrite) \
-    .option("checkpointLocation", "/home/ec2-user/checkpoints/gold") \
+query=df.writeStream\
+    .foreachBatch(LakehouseWrite)\
+    .option("checkpointLocation", "/home/ec2-user/checkpoints/lakehouse") \
+    .outputMode("append") \
     .start()
 
-spark.streams.awaitAnyTermination()
 
-# silverquery = (
-#     df.writeStream
-#       .foreachBatch(IcebergSilverWrite)
-#       .option("checkpointLocation", "/home/ec2-user/checkpoints/silver")
-#       .outputMode("append")
-#       .trigger(processingTime="1 minute")
-#       .start()
-# )
+query.awaitTermination()
+

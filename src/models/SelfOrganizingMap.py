@@ -24,6 +24,7 @@ class SOMModel(BaseAnomalyModel):
             sigma=self.params['sigma'],
             learning_rate=self.params['learning_rate']
         )
+        self.feature_names=None
 
     def fit(self,X):
         if not isinstance(X, np.ndarray):
@@ -44,3 +45,38 @@ class SOMModel(BaseAnomalyModel):
             X = X.to_numpy()
         distances=np.array([self.bmudistance(x) for x in X])
         return distances
+    
+    def explain(self, X, feature_names=None):
+
+        if not isinstance(X, np.ndarray):
+            X = X.to_numpy()
+
+        scores = self.score(X)
+
+        if feature_names is None:
+            feature_names = [
+                f"feature_{i}"
+                for i in range(X.shape[1])
+            ]
+
+        explanations = []
+
+        for sample in X:
+
+            winner = self.model.winner(sample)
+
+            prototype = self.model.get_weights()[winner]
+
+            deviations = np.abs(sample - prototype)
+
+            contributions = (
+                deviations /
+                (np.sum(deviations) + 1e-8)
+            )
+
+            explanations.append({
+                feature_names[i]: float(contributions[i])
+                for i in range(len(feature_names))
+            })
+
+        return scores, explanations

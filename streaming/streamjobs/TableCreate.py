@@ -1,10 +1,5 @@
 from pyspark.sql import SparkSession
 
-'''
-Usage :
-opt/spark/bin/spark-submit --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.4.2 sparkjobs/TableCreate.py
-'''
-
 spark = SparkSession.builder \
     .appName("StreamPipeline") \
     .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
@@ -19,10 +14,13 @@ spark.sql("CREATE NAMESPACE IF NOT EXISTS lake.bronze")
 spark.sql("CREATE NAMESPACE IF NOT EXISTS lake.silver")
 spark.sql("CREATE NAMESPACE IF NOT EXISTS lake.gold")
 
-spark.sql("DROP TABLE lake.bronze.transactions")
-spark.sql("DROP TABLE lake.silver.features")
-spark.sql("DROP TABLE lake.gold.scores")
+spark.sql("DROP TABLE IF EXISTS lake.bronze.transactions")
+spark.sql("DROP TABLE IF EXISTS lake.silver.features")
+spark.sql("DROP TABLE IF EXISTS lake.gold.scores")
 
+# =========================
+# BRONZE TABLE
+# =========================
 spark.sql("""
 CREATE TABLE IF NOT EXISTS lake.bronze.transactions (
     TransactionID STRING,
@@ -41,12 +39,18 @@ CREATE TABLE IF NOT EXISTS lake.bronze.transactions (
     CardType STRING,
     Age INT,
     Gender STRING,
-    Bank STRING
+    Bank STRING,
+
+    -- Pipeline timestamp
+    bronzetimestamp TIMESTAMP
 )
 USING iceberg
 PARTITIONED BY (days(Time))
 """)
 
+# =========================
+# SILVER TABLE
+# =========================
 spark.sql("""
 CREATE TABLE IF NOT EXISTS lake.silver.features (
     -- =========================
@@ -99,12 +103,18 @@ CREATE TABLE IF NOT EXISTS lake.silver.features (
     CardTypeEntropy DOUBLE,
     MerchandEntropy DOUBLE,
     CountryEntropy DOUBLE,
-    CityEntropy DOUBLE
+    CityEntropy DOUBLE,
+
+    -- Pipeline timestamp
+    silvertimestamp TIMESTAMP
 )
 USING iceberg
 PARTITIONED BY (days(Time))
 """)
 
+# =========================
+# GOLD TABLE
+# =========================
 spark.sql("""
 CREATE TABLE IF NOT EXISTS lake.gold.scores (
     -- =========================
@@ -133,8 +143,17 @@ CREATE TABLE IF NOT EXISTS lake.gold.scores (
     -- =========================
     isoscore DOUBLE,
     aescore DOUBLE,
-    somscore DOUBLE
-    
+    somscore DOUBLE,
+
+    -- =========================
+    -- Explainability maps
+    -- =========================
+    if_explain MAP<STRING, DOUBLE>,
+    ae_explain MAP<STRING, DOUBLE>,
+    som_explain MAP<STRING, DOUBLE>,
+
+    -- Pipeline timestamp
+    goldtimestamp TIMESTAMP
 )
 USING iceberg
 PARTITIONED BY (days(Time))
