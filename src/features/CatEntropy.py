@@ -1,24 +1,47 @@
 import numpy as np
 import pandas as pd
 
-def normalentropy(series):
-    p=series.value_counts(normalize=True)
-    h=-(p*np.log(p)).sum()
-    return h/np.log(len(p)) if len(p) > 1 else 0
+def running_entropy(series):
+    """
+    For each position in the series, compute normalized entropy
+    using only values seen up to and including that position.
+    """
+    counts = {}
+    entropies = []
+    
+    for i, val in enumerate(series, start=1):
+        counts[val] = counts.get(val, 0) + 1
+        
+        total = i  # number of transactions seen so far
+        n_unique = len(counts)
+        
+        if n_unique == 1:
+            entropies.append(0.0)  # only one category seen → zero entropy
+            continue
+        
+        # compute entropy from running counts
+        probs = np.array(list(counts.values())) / total
+        h = -(probs * np.log(probs)).sum()
+        h_norm = h / np.log(n_unique)  # normalize to [0, 1]
+        entropies.append(h_norm)
+    
+    return pd.Series(entropies, index=series.index)
+
 
 def ComputeCatEntropy(df):
-    transactiontypeentropy=df.groupby("Account Number")['Transaction Type'].apply( normalentropy ).reset_index(name="TransactionTypeEntropy")
-    channelentropy=df.groupby("Account Number")['Channel'].apply( normalentropy ).reset_index(name="ChannelEntropy")
-    cardtypeentropy=df.groupby("Account Number")['Card Type'].apply( normalentropy ).reset_index(name="CardTypeEntropy")
-    merchandentropy=df.groupby("Account Number")['Merchand Group'].apply( normalentropy ).reset_index(name="MerchandEntropy")
-    countryentropy=df.groupby("Account Number")['Country'].apply( normalentropy ).reset_index(name="CountryEntropy")
-    cityentropy=df.groupby("Account Number")['City'].apply( normalentropy ).reset_index(name="CityEntropy")
-
-    df=df.merge(transactiontypeentropy,on='Account Number',how='left')
-    df=df.merge(channelentropy,on='Account Number',how='left')
-    df=df.merge(cardtypeentropy,on='Account Number',how='left')
-    df=df.merge(merchandentropy,on='Account Number',how='left')
-    df=df.merge(countryentropy,on='Account Number',how='left')
-    df=df.merge(cityentropy,on='Account Number',how='left')
-
+    cat_cols = {
+        'Transaction Type': 'TransactionTypeEntropy',
+        'Channel':          'ChannelEntropy',
+        'Card Type':        'CardTypeEntropy',
+        'Merchand Group':   'MerchandEntropy',
+        'Country':          'CountryEntropy',
+        'City':             'CityEntropy',
+    }
+    
+    for col, feat_name in cat_cols.items():
+        df[feat_name] = (
+            df.groupby("Account Number")[col]
+            .transform(running_entropy)
+        )
+    
     return df

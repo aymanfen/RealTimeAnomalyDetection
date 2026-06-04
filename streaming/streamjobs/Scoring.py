@@ -78,11 +78,12 @@ def ae_udf(*cols):
 
 @pandas_udf(MODEL_OUTPUT_SCHEMA)
 def som_udf(*cols):
+    df = _call("/som/explain", _prep(*cols))
 
-    return _call(
-        "/som/explain",
-        _prep(*cols)
-    )
+    return pd.DataFrame({
+        "som_score": df["score"],
+        "som_explain": df["explain"],
+    })
 
 @pandas_udf(ENSEMBLE_SCHEMA)
 def ensemble_udf(*cols):
@@ -130,7 +131,7 @@ def ComputeScores(df: DataFrame) -> DataFrame:
     
     return df.select(*[col(c) for c in TRANSACTION_COLS],
             # SOM
-            col("som.score").alias("somscore"),
-            col("som.explain").alias("somexplain"),
+            col("som.som_score").alias("som_score"),
+            col("som.som_explain").alias("som_explain"),
         )
     

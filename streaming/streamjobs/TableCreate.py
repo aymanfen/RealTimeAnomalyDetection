@@ -5,7 +5,7 @@ spark = SparkSession.builder \
     .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
     .config("spark.sql.catalog.lake", "org.apache.iceberg.spark.SparkCatalog") \
     .config("spark.sql.catalog.lake.type", "hadoop") \
-    .config("spark.sql.catalog.lake.warehouse", "hdfs://172.31.28.178:9000/iceberg") \
+    .config("spark.sql.catalog.lake.warehouse", "hdfs://192.168.1.14:9000/iceberg") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
@@ -14,13 +14,13 @@ spark.sql("CREATE NAMESPACE IF NOT EXISTS lake.bronze")
 spark.sql("CREATE NAMESPACE IF NOT EXISTS lake.silver")
 spark.sql("CREATE NAMESPACE IF NOT EXISTS lake.gold")
 
+
 spark.sql("DROP TABLE IF EXISTS lake.bronze.transactions")
 spark.sql("DROP TABLE IF EXISTS lake.silver.features")
 spark.sql("DROP TABLE IF EXISTS lake.gold.scores")
 
-# =========================
-# BRONZE TABLE
-# =========================
+
+#Bronze Table
 spark.sql("""
 CREATE TABLE IF NOT EXISTS lake.bronze.transactions (
     TransactionID STRING,
@@ -48,9 +48,8 @@ USING iceberg
 PARTITIONED BY (days(Time))
 """)
 
-# =========================
-# SILVER TABLE
-# =========================
+
+#Silver Table
 spark.sql("""
 CREATE TABLE IF NOT EXISTS lake.silver.features (
     -- =========================
@@ -112,9 +111,7 @@ USING iceberg
 PARTITIONED BY (days(Time))
 """)
 
-# =========================
-# GOLD TABLE
-# =========================
+#Gold Table
 spark.sql("""
 CREATE TABLE IF NOT EXISTS lake.gold.scores (
     -- =========================
@@ -138,18 +135,8 @@ CREATE TABLE IF NOT EXISTS lake.gold.scores (
     Gender STRING,
     Bank STRING,
 
-    -- =========================
     -- Model scores
-    -- =========================
-    isoscore DOUBLE,
-    aescore DOUBLE,
-    somscore DOUBLE,
-
-    -- =========================
-    -- Explainability maps
-    -- =========================
-    if_explain MAP<STRING, DOUBLE>,
-    ae_explain MAP<STRING, DOUBLE>,
+    som_score DOUBLE,
     som_explain MAP<STRING, DOUBLE>,
 
     -- Pipeline timestamp

@@ -15,7 +15,6 @@ python3 kafkascripts/CBSProducer.py --max-transactions 1000 --tps 100
 
 '''
 
-
 TRANSACTION_TYPES = ["PAYMENT", "WITHDRAWAL", "TRANSFER", "REFUND"]
 CHANNELS = ["ATM", "POS", "WEB", "MOBILE"]
 CARD_TYPES = ["VISA", "MASTERCARD", "AMEX"]
@@ -48,7 +47,7 @@ def GenerateTransaction():
 
 
 p = argparse.ArgumentParser(description="Parametric banking transaction Kafka producer")
-p.add_argument("--brokers", default="172.31.24.87:9092",
+p.add_argument("--brokers", default="localhost:9092",
                    help="Comma-separated Kafka bootstrap servers")
 p.add_argument("--topic",   default="transactions",
                    help="Target Kafka topic")

@@ -7,7 +7,7 @@ from Scoring import ComputeScores
 
 '''
 Usage :
-opt/spark/bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.4.2 --py-files sparkjobs/Scoring.py sparkjobs/pipeline.py
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.4.2 --py-files Scoring.py pipeline.py
 
 '''
 
@@ -16,7 +16,7 @@ spark = SparkSession.builder \
     .config("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
     .config("spark.sql.catalog.lake", "org.apache.iceberg.spark.SparkCatalog") \
     .config("spark.sql.catalog.lake.type", "hadoop") \
-    .config("spark.sql.catalog.lake.warehouse", "hdfs://172.31.28.178:9000/iceberg") \
+    .config("spark.sql.catalog.lake.warehouse", "hdfs://192.168.1.14:9000/iceberg") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
@@ -44,9 +44,10 @@ schema = StructType([
 # ── 1. read ────────────────────────────────────────────────────────────────────
 kafkadf = spark.readStream \
          .format("kafka") \
-         .option("kafka.bootstrap.servers", "172.31.24.87:9092") \
+         .option("kafka.bootstrap.servers", "192.168.1.14:9092") \
          .option("subscribe",       "transactions") \
          .option("startingOffsets", "latest") \
+        .option("failOnDataLoss", "false") \
          .load()
 
 # ── 2. parse ───────────────────────────────────────────────────────────────────
@@ -57,20 +58,6 @@ df = kafkadf.selectExpr("CAST(value AS STRING)") \
 
 
 # ── 3. write functions ─────────────────────────────────────────────────────────
-def IcebergBronzeWrite(batch_df, batch_id):
-    batch_df.writeTo("lake.bronze.transactions").append()
-
-def IcebergSilverWrite(batch_df, batch_id):
-    batch_df = batch_df.repartition("AccountNumber")
-    batch_df = ComputeTimeFeatures(batch_df)
-    batch_df = ComputeAllFreqs(batch_df)
-    batch_df = ComputeAllEntropy(batch_df)
-    batch_df.writeTo("lake.silver.features").append()
-
-def IcebergGoldWrite(batch_df, batch_id):
-    batch_df = ComputeScores(batch_df)
-    batch_df.writeTo("lake.gold.scores").append()
-
 def LakehouseWrite(batch_df, batch_id):
     bronze_df = batch_df.withColumn("bronzetimestamp",current_timestamp())
     bronze_df.writeTo("lake.bronze.transactions").append()
@@ -91,7 +78,7 @@ def LakehouseWrite(batch_df, batch_id):
 # ── 4. queries ─────────────────────────────────────────────────────────────────
 query=df.writeStream\
     .foreachBatch(LakehouseWrite)\
-    .option("checkpointLocation", "/home/ec2-user/checkpoints/lakehouse") \
+    .option("checkpointLocation", "/home/aymanfen/checkpoints/lakehouse") \
     .outputMode("append") \
     .start()
 
