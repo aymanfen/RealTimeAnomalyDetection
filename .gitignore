@@ -1,5 +1,10 @@
 *.csv
 *.pyc
 *.db
+*.class
+
 /mlruns
 /notebooks/mlruns
+
+/streaming/SparkScala/project
+/streaming/SparkScala/target

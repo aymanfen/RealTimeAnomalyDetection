@@ -28,7 +28,7 @@ def GenerateTransaction():
     return {
         "TransactionID":str(uuid.uuid4()),
         "Time":datetime.now(timezone.utc).isoformat(),
-        "AccountNumber":f"ACC{random.randint(100000, 999999)}",
+        "AccountNumber":f"ACC{random.randint(100000, 100090)}",
         "CardNumber":f"****-****-****-{random.randint(1000,9999)}",
         "TransactionType":random.choice(TRANSACTION_TYPES),
         "Channel":random.choice(CHANNELS),
