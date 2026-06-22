@@ -3,49 +3,47 @@ from minisom import MiniSom
 import numpy as np
 
 
-
 class SOMModel(BaseAnomalyModel):
-    def __init__(self,x=10,y=10,inputlen=18,
-                 sigma=1.0,learning_rate=0.5,iterations=1000):
-        
-        self.params={
-            "x":x,
-            "y":y,
-            "inputlen":inputlen,
-            "sigma":sigma,
-            "learning_rate":learning_rate,
-            "iterations":iterations
-        }
-        self.x=x
-        self.y=y
-        self.iterations=iterations
-        self.model=MiniSom(
-            self.x,self.y,inputlen,
-            sigma=self.params['sigma'],
-            learning_rate=self.params['learning_rate']
-        )
-        self.feature_names=None
+    def __init__(self, x=10, y=10, inputlen=18,
+                 sigma=0.8, learning_rate=0.4, iterations=1000):
 
-    def fit(self,X):
+        self.params = {
+            "x": x,
+            "y": y,
+            "inputlen": inputlen,
+            "sigma": sigma,
+            "learning_rate": learning_rate,
+            "iterations": iterations,
+        }
+        self.x = x
+        self.y = y
+        self.iterations = iterations
+        self.model = MiniSom(
+            self.x, self.y, inputlen,
+            sigma=sigma,
+            learning_rate=learning_rate,
+        )
+        self.feature_names = None
+
+    def fit(self, X, **fit_kwargs):
         if not isinstance(X, np.ndarray):
             X = X.to_numpy()
 
         self.model.random_weights_init(X)
-        self.model.train_random(X,self.iterations)
-
+        self.model.train_random(X, self.iterations)
 
     def bmudistance(self, sample):
-        winner=self.model.winner(sample)
-        weights=self.model.get_weights()[winner]
+        winner = self.model.winner(sample)
+        weights = self.model.get_weights()[winner]
 
-        return np.linalg.norm(sample-weights)
+        return np.linalg.norm(sample - weights)
 
-    def score(self,X):
+    def score(self, X):
         if not isinstance(X, np.ndarray):
             X = X.to_numpy()
-        distances=np.array([self.bmudistance(x) for x in X])
+        distances = np.array([self.bmudistance(x) for x in X])
         return distances
-    
+
     def explain(self, X, feature_names=None):
 
         if not isinstance(X, np.ndarray):

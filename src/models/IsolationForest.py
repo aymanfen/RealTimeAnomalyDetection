@@ -2,30 +2,31 @@ from src.models.BaseClass import BaseAnomalyModel
 from sklearn.ensemble import IsolationForest
 import numpy as np
 
-class IsolationForestModel(BaseAnomalyModel):
-    def __init__(self,nestimators=200,maxsamples=0.8,contamination=0.05,random_state=42):
 
-        self.params={
-            "n_estimators":nestimators,
-            "max_samples":maxsamples,
-            "contamination":contamination
-            }
-        
-        self.model=IsolationForest(
+class IsolationForestModel(BaseAnomalyModel):
+    def __init__(self, nestimators=100, maxsamples='auto', contamination=0.001, random_state=42):
+
+        self.params = {
+            "n_estimators": nestimators,
+            "max_samples": maxsamples,
+            "contamination": contamination,
+            "random_state": random_state,
+        }
+
+        self.model = IsolationForest(
             n_estimators=nestimators,
             max_samples=maxsamples,
             contamination=contamination,
-            random_state=random_state
-            )
-        self.feature_names=None
-        
+            random_state=random_state,
+        )
+        self.feature_names = None
 
-    def fit(self,X):
+    def fit(self, X, **fit_kwargs):
         return self.model.fit(X)
-    
-    def score(self,X):
+
+    def score(self, X):
         return -self.model.decision_function(X)
-    
+
     def explain(self, X, feature_names=None):
 
         scores = self.score(X)
